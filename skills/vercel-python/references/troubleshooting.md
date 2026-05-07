@@ -17,8 +17,12 @@ Use this reference when Vercel build output, runtime logs, or the inspector repo
 
 `DJANGO_ENTRYPOINT_NOT_FOUND`
 
-- Move or expose `manage.py` at the project root or one directory below.
-- Ensure the project includes importable Django settings.
+- Confirm `manage.py` is at the project root or one directory below.
+- Verify the settings module defines `ASGI_APPLICATION` or `WSGI_APPLICATION`:
+  ```bash
+  uv run manage.py diffsettings | grep -E 'WSGI_APPLICATION|ASGI_APPLICATION'
+  ```
+- Ensure required environment variables are set in the Vercel project so the settings module can import.
 
 `PYTHON_HANDLER_NOT_FOUND`
 
@@ -37,7 +41,7 @@ Use this reference when Vercel build output, runtime logs, or the inspector repo
 - Check `[tool.vercel]` keys and Vercel function config.
 - Prefer simple `[tool.vercel].entrypoint` for entrypoint overrides.
 
-`VERCEL_JSON_PARSE_ERROR`
+`INVALID_VERCEL_JSON`
 
 - Fix invalid JSON in `vercel.json`.
 - Remove comments; JSON does not allow them.

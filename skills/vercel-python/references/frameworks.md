@@ -4,7 +4,7 @@ Use this reference for FastAPI, Flask, Django, ASGI/WSGI app shape, static files
 
 ## Zero Configuration
 
-Correctly structured Python projects deploy with zero configuration. No `vercel.json` is needed when the entrypoint and callable follow Vercel's conventions. Only add `vercel.json` when explicit overrides are required.
+Correctly structured Python projects deploy with zero configuration. No `vercel.json` is needed when the entrypoint and callable follow Vercel's conventions. Do not create a `vercel.json` unless the project genuinely needs an override — unnecessary config is a common source of deployment failures.
 
 ## FastAPI
 
@@ -23,11 +23,10 @@ def read_root():
 
 FastAPI is ASGI. Declare both `fastapi` and an ASGI server such as `uvicorn` in the dependency manifest. WSGI frameworks like Flask do not need `uvicorn`.
 
-Vercel searches `app/`, `src/`, and `api/` directories in addition to the project root. An entrypoint at `app/main.py` with a top-level `app` callable works without any extra configuration.
+See `runtime-and-entrypoints.md` for entrypoint discovery rules and conventional file names.
 
 Typical fixes:
 
-- Put the app in `main.py`, `app.py`, `app/main.py`, or configure `[tool.vercel].entrypoint`.
 - Export `app` at top level.
 - Do not rely on local dev commands such as `uvicorn main:app` as the deploy entrypoint.
 
@@ -93,9 +92,40 @@ Django static collection can run during build when static settings are compatibl
 - Default Django static storage.
 - `ManifestStaticFilesStorage`.
 - WhiteNoise `CompressedManifestStaticFilesStorage`.
-- Some `django-storages` configurations.
+- `django-storages` configurations.
 
 `WHITENOISE_USE_FINDERS=True` can work without `STATIC_ROOT`, but prefer an explicit static setup for production.
+
+## Background Workers
+
+Vercel supports background task processing via the `vercel-workers` package. Worker services run alongside the web service and consume messages from Vercel Queues.
+
+The `vercel-workers` package provides:
+
+- `send()` and `@subscribe` primitives for publishing and consuming queue messages.
+- Adapters for **Celery**, **Dramatiq**, and **Django tasks**.
+
+Worker services are configured in `vercel.json` using `experimentalServices`:
+
+```json
+{
+  "experimentalServices": {
+    "web": {
+      "framework": "fastapi",
+      "entrypoint": "main.py",
+      "routePrefix": "/"
+    },
+    "worker": {
+      "type": "worker",
+      "entrypoint": "worker.py",
+      "topic": "default",
+      "consumer": "default"
+    }
+  }
+}
+```
+
+When a Python app requires background processing (task queues, scheduled jobs, event-driven workers), check whether `vercel-workers` can handle the workload before concluding that the app is incompatible with Vercel.
 
 ## Databases
 

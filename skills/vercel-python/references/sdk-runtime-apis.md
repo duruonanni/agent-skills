@@ -2,7 +2,7 @@
 
 The official Python SDK for Vercel is the `vercel` package on PyPI. Do not use unofficial third-party packages for Vercel platform APIs.
 
-The SDK requires Python 3.10+ and provides both synchronous and asynchronous APIs. It is under active development; refer to the [vercel package on PyPI](https://pypi.org/project/vercel/) for current API documentation and usage examples.
+The SDK requires Python 3.10+ and provides both synchronous and asynchronous APIs. It is under active development and its API surface may change significantly between releases — concrete code examples are intentionally omitted here to avoid going stale. Refer to the [SDK README](https://github.com/vercel/vercel-py) for the latest code examples and the [vercel package on PyPI](https://pypi.org/project/vercel/) for release history.
 
 ## Capabilities
 
@@ -20,8 +20,8 @@ The SDK provides Python clients for the following Vercel platform features:
 
 ## Middleware Pattern
 
-Python web frameworks (FastAPI, Flask, Django) can call the SDK's `set_headers()` function at the start of each request to store Vercel-provided headers in a context variable. This enables OIDC token resolution and request helper functions to access Vercel headers without passing the request object explicitly. See the SDK README for the current middleware integration pattern.
+Python web frameworks (FastAPI, Flask, Django) can call the SDK's `set_headers()` function at the start of each request to store Vercel-provided headers in a context variable. This enables OIDC token resolution and request helper functions to access Vercel headers without passing the request object explicitly. See the [SDK README](https://github.com/vercel/vercel-py) for the current middleware integration pattern.
 
 ## Import Guidance
 
-Always use the `vercel` package for Vercel platform APIs. If code imports from an unofficial package, replace it with the official SDK. Refer to the SDK README for current import paths and examples.
+Always use the `vercel` package for Vercel platform APIs. If code imports from an unofficial package, replace it with the official SDK. Refer to the [SDK README](https://github.com/vercel/vercel-py) for current import paths and examples.

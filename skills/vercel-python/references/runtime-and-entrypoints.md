@@ -4,32 +4,20 @@ Use this reference when Vercel cannot find a Python app, the callable is wrong, 
 
 ## Entrypoint Discovery
 
-Vercel's Python builder looks for conventional entrypoint files named:
+Entrypoint resolution follows this priority:
 
-- `app.py`
-- `index.py`
-- `server.py`
-- `main.py`
-- `wsgi.py`
-- `asgi.py`
+1. **`[tool.vercel].entrypoint`** in `pyproject.toml` — explicit path, highest priority.
+2. **Framework-specific discovery:**
+   - **Django:** The builder reads `manage.py` to find `DJANGO_SETTINGS_MODULE`, then looks in the settings module for top-level symbols.
+   - **Everything else:** Conventional files named `app.py`, `index.py`, `server.py`, `main.py`, `wsgi.py`, or `asgi.py`. Search locations are the project root and shallow app directories such as `src`, `app`, and `api`.
+3. **`[project.scripts].app`** in `pyproject.toml` — legacy fallback.
 
-The common search locations are the project root and shallow app directories such as `src`, `app`, and `api`. Prefer conventional names when possible.
-
-For nonstandard layouts, use `pyproject.toml`:
+Prefer `[tool.vercel].entrypoint` for new work:
 
 ```toml
 [tool.vercel]
 entrypoint = "api/main.py"
 ```
-
-Legacy projects may use:
-
-```toml
-[project.scripts]
-app = "api/main.py"
-```
-
-Prefer `[tool.vercel].entrypoint` for new work.
 
 ## Callable Symbols
 
@@ -68,12 +56,14 @@ The runtime runs ASGI apps through a vendored Uvicorn layer for lifespan support
 
 ## Django Discovery
 
-Django detection starts from `manage.py`, usually at the project root or one directory below. The builder looks at Django settings and prefers `ASGI_APPLICATION` over `WSGI_APPLICATION`.
+Django detection starts from `manage.py`, usually at the project root or one directory below. The builder reads `manage.py` to find the module used to set `DJANGO_SETTINGS_MODULE`, then looks in that module for top-level symbols. It prefers `ASGI_APPLICATION` over `WSGI_APPLICATION`.
+
+If the settings module depends on environment variables or other configuration, these must be set in the Vercel project so the build environment can resolve them.
 
 Common blockers:
 
 - `manage.py` is nested too deeply.
-- `DJANGO_SETTINGS_MODULE` cannot import because dependencies or environment variables are missing.
+- `DJANGO_SETTINGS_MODULE` cannot import because dependencies or environment variables are missing. Set required env vars in the Vercel project settings.
 - Settings only define `WSGI_APPLICATION` when the app expects ASGI behavior.
 
 ## Working Directory
